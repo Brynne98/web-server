@@ -5,10 +5,21 @@ const publicDir = path.join(__dirname, "../public");
 
 const app = express();
 
+app.set('view engine', 'hbs');
 app.use(express.static(publicDir))
 
+app.get('', (req, res) => {
+    res.render('index', {
+        name: 'Brynne Prince',
+        position: 'Software developer'
+    });
+})
+
 app.get("/help", (req, res) => {
-    res.send("Help page")
+    res.render("help", {
+        title: 'HELP',
+        message: 'How can I help you?'
+    })
 })
 
 app.get("/weather", (req, res) => {
