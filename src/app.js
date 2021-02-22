@@ -1,3 +1,6 @@
+const geoCode = require("./utils/geoCode");
+const forecast = require("./utils/forecast");
+
 const path =  require("path");
 const express = require("express");
 const hbs = require("hbs");
@@ -15,7 +18,7 @@ app.set('views', viewsPath);
 hbs.registerPartials(partialsPath);
 
 //Setup static directory to serve
-app.use(express.static(publicDir));
+express().use(express.static(publicDir));
 
 app.get('', (req, res) => {
     res.render('index', {
@@ -45,11 +48,32 @@ app.get("/about", (req, res) => {
 })
 
 app.get("/weather", (req, res) => {
-    res.send({
-        "actual": 27,
-        "feelsLike": 24,
-        "location": "My home"
-    })
+    if(!req.query.address) {
+        return res.send({
+            error: 'Address not provided'
+        })
+    }
+
+    geoCode(req.query.address, (error, response) => {
+        if(error) {
+            return res.send({
+                error
+            })
+        }
+
+        forecast(response.latitude, response.longitude, (error, response) => {
+            if(error) {
+                return res.send({
+                    error
+                })
+            }
+
+            res.send({
+                foreCast: response,
+                location: req.query.address
+            })
+        });
+    });
 })
 
 app.get('/help/*', (req, res) => {
